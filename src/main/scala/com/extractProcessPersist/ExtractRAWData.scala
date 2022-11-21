@@ -1,28 +1,26 @@
 package com.extractProcessPersist
 
 import org.apache.log4j.{Level, Logger}
-
-import org.apache.spark.sql.SaveMode
+import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
-
 import com.awsOperations.S3Operator
 import com.dataModels.RAWWarcData
 import com.warcOperations.{WARCExtractor, WARCReader}
 
 import scala.collection.JavaConverters.iterableAsScalaIterable
 
-object ExtractRAWData {
+object ExtractRAWData extends HouseKeeping with App {
 
-  def main(args: Array[String]): Unit = {
-    val spark = HouseKeeping.getSparkSession("Local")
+
+    val spark = getSparkSession("Local")
     Logger.getLogger("org").setLevel(Level.ERROR)
     spark.sparkContext.setLogLevel("WARN")
 
     /*TODO: Implement this with Docker env vars or secrets.*/
     spark.sparkContext // first arg has access key
-      .hadoopConfiguration.set("fs.s3a.access.key", args(0))
+      .hadoopConfiguration.set("fs.s3a.access.key", "...")
     spark.sparkContext // first arg has secret key
-      .hadoopConfiguration.set("fs.s3a.secret.key", args(1))
+      .hadoopConfiguration.set("fs.s3a.secret.key", "...")
     spark.sparkContext
       .hadoopConfiguration.set("fs.s3a.endpoint", "s3.amazonaws.com")
 
@@ -66,5 +64,5 @@ object ExtractRAWData {
       .format("parquet")
       .save(s3OutputBucket)
 
-  }
+
 }
